@@ -122,33 +122,48 @@ function Com2() {
   return data.map((da)=><IndeterminateCheckbox data={da}/>)
 }
 
-function CheckB({data ,index ,setChecked ,checked}){
+function CheckB({data ,index ,checkedSub ,setCheckedSub }){
+  
+
   const handleChange = (event) => {
-    setChecked(checked[index]=event.target.checked);
-    [event.target.checked, checked[index]]
+    setCheckedSub((ch)=>ch.map((che,ind)=>ind===index?event.target.checked:che));
   };
+
+  
   return (<FormControlLabel
     label={data}
-    control={<Checkbox checked={checked[index]} onChange={handleChange} />}
+    control={<Checkbox checked={checkedSub[index]} onChange={handleChange} />}
   />)
 
 }
 
 function IndeterminateCheckbox( {data}) {
   
-  const [checked, setChecked] = useState([]);
-  useEffect(()=>{
-    data.sub_departments.forEach((e)=>checked.push(false));
+  const [checked, setChecked] = useState(false);
+  const [checkedSub, setCheckedSub] = useState(data.sub_departments.map(()=>false));
 
-  },[])
+  useEffect(()=>{
+    if(!checkedSub.includes(false)){
+      setChecked(true);
+    }
+    else setChecked(false);
+  },[checkedSub]);
+  useEffect(()=>{
+    if(checked) {
+      setCheckedSub(data.sub_departments.map(()=>true));
+      }
+      else {
+      setCheckedSub((checked)=>checked.map((ch)=>ch));
+      } 
+  },[checked])
 
   const handleChange1 = (event) => {
-    setChecked(data.sub_departments.map((e)=>true));
+    setChecked(event.target.checked);
   };
 
   const children = (
     <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
-      {data.sub_departments.map((data,index)=><CheckB checked={checked} data={data} index={index} setChecked={setChecked} key={index}/>)}
+      {data.sub_departments.map((data,index)=><CheckB checkedSub={checkedSub} data={data} index={index} setCheckedSub={setCheckedSub} key={index}/>)}
     </Box>
   );
 
@@ -158,8 +173,8 @@ function IndeterminateCheckbox( {data}) {
         label={data.department}
         control={
           <Checkbox
-            checked={checked[0] && checked[1]}
-            indeterminate={checked[0] !== checked[1]}
+            checked={checked}
+            indeterminate={checked}
             onChange={handleChange1}
           />
         }
